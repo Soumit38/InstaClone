@@ -66,6 +66,8 @@
     <string name="string_open_camera">Open Camera</string>
     <string name="string_next">Next</string>
     <string name="string_share">Share</string>
+    <string name="sign_out">Sign out</string>
+    <string name="edit_profile">Edit profile</string>
 
 
 </resources>
