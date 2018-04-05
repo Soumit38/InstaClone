@@ -6,32 +6,43 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.soumit.instaclone.R;
-import com.example.soumit.instaclone.ViewPostFragment;
+import com.example.soumit.instaclone.utils.ViewCommentsFragment;
+import com.example.soumit.instaclone.utils.ViewPostFragment;
 import com.example.soumit.instaclone.models.Photo;
-import com.example.soumit.instaclone.utils.BottomNavigationViewHelper;
-import com.example.soumit.instaclone.utils.GridImageAdapter;
-import com.example.soumit.instaclone.utils.UniversalImageLoader;
-import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
-
-import java.util.ArrayList;
+import com.example.soumit.instaclone.utils.ViewProfileFragment;
 
 /**
  * Created by Soumit on 2/20/2018.
  */
 
-public class ProfileActivity extends AppCompatActivity implements ProfileFragment.OnGridSelectedListener {
+public class ProfileActivity extends AppCompatActivity implements
+        ProfileFragment.OnGridSelectedListener,
+        ViewPostFragment.OnCommentThreadSelectedListener,
+        ViewProfileFragment.OnGridImageSelectedListener{
+
     private static final String TAG = "ProfileActivity";
+
+    @Override
+    public void onCommentThreadSelectedListener(Photo photo) {
+        Log.d(TAG, "onCommentThreadSelectedListener: selected a comment thread");
+
+        ViewCommentsFragment fragment = new ViewCommentsFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.photo), photo);
+        fragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(getString(R.string.view_comments_fragment));
+        transaction.commit();
+
+    }
 
     @Override
     public void onGridImageSelected(Photo photo, int activityNumber) {
@@ -66,25 +77,41 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
 
         init();
 
-//        setUpBottomNavigationView();
-//        setupToolbar();
-//
-//        setupActivityWidgets();
-//        setProfileImage();
-//
-//        tempGridSetup();
     }
 
-    private void init(){
+    private void init() {
         Log.d(TAG, "init: inflating " + getString(R.string.profile_fragment));
 
-        ProfileFragment fragment = new ProfileFragment();
-        FragmentTransaction transaction = ProfileActivity.this.getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.addToBackStack(getString(R.string.profile_fragment));
-        transaction.commit();
-    }
+        Intent intent = getIntent();
 
+        if (intent.hasExtra(getString(R.string.calling_activity))) {
+            Log.d(TAG, "init: searching for user object attached as intent extra...");
+
+            if(intent.hasExtra(getString(R.string.intent_user))) {
+                ViewProfileFragment fragment = new ViewProfileFragment();
+                Bundle args = new Bundle();
+                args.putParcelable(getString(R.string.intent_user),
+                        intent.getParcelableExtra(getString(R.string.intent_user)));
+                fragment.setArguments(args);
+
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.container, fragment);
+                transaction.addToBackStack(getString(R.string.view_profile_fragment));
+                transaction.commit();
+
+            }else {
+                Toast.makeText(context, "Something went wrong!", Toast.LENGTH_SHORT).show();
+            }
+
+        } else {
+
+            ProfileFragment fragment = new ProfileFragment();
+            FragmentTransaction transaction = ProfileActivity.this.getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.container, fragment);
+            transaction.addToBackStack(getString(R.string.profile_fragment));
+            transaction.commit();
+        }
+    }
 
 
 //    private void tempGridSetup(){
